@@ -1,0 +1,7 @@
+[
+{
+  "directory": "C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86",
+  "command": "C:\\Users\\samy\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=i686-none-linux-android21 --sysroot=C:/Users/samy/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dlibmpv_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC -o CMakeFiles\\libmpv.dir\\libmpv.cpp.o -c C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\cpp\\libmpv.cpp",
+  "file": "C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\cpp\\libmpv.cpp"
+}
+]

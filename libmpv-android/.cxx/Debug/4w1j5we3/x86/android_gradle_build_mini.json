@@ -1,0 +1,27 @@
+{
+  "buildFiles": [
+    "C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\cpp\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\samy\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\dev\\projects\\libmpv-android\\libmpv-android\\.cxx\\Debug\\4w1j5we3\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\samy\\AppData\\Local\\Android\\Sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\dev\\projects\\libmpv-android\\libmpv-android\\.cxx\\Debug\\4w1j5we3\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "libmpv::@6890427a1f51a3e7e1df": {
+      "artifactName": "libmpv",
+      "abi": "x86",
+      "output": "C:\\dev\\projects\\libmpv-android\\libmpv-android\\build\\intermediates\\cxx\\Debug\\4w1j5we3\\obj\\x86\\liblibmpv.so",
+      "runtimeFiles": []
+    }
+  }
+}
