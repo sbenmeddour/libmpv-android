@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+. ../../include/depinfo.sh
 . ../../include/path.sh
 
 if [ "$1" == "build" ]; then
@@ -29,7 +30,17 @@ cpuflags=
 	--enable-{jni,mediacodec,mbedtls,libdav1d} --disable-vulkan \
 	--disable-static --enable-shared --enable-{gpl,version3} \
 	--disable-{stripping,doc,programs} \
-	--disable-{muxers,encoders,devices} --enable-encoder=mjpeg,png
+	--disable-{muxers,encoders,devices,filters} \
+	--disable-v4l2-m2m
 
 make -j$cores
 make DESTDIR="$prefix_dir" install
+
+ln -sf "$prefix_dir"/lib/libswresample.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libpostproc.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libavutil.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libavcodec.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libavformat.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libswscale.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libavfilter.so "$native_dir"
+ln -sf "$prefix_dir"/lib/libavdevice.so "$native_dir"

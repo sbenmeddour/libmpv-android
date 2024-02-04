@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: libmpv
+# Project: libmpv-android
 # Configurations: Debug
 # =============================================================================
 
@@ -41,43 +41,44 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = C$:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86/
 # =============================================================================
-# Object build statements for SHARED_LIBRARY target libmpv
+# Object build statements for SHARED_LIBRARY target mpv-android
 
 
 #############################################
-# Order-only phony target for libmpv
+# Order-only phony target for mpv-android
 
-build cmake_object_order_depends_target_libmpv: phony || CMakeFiles/libmpv.dir
+build cmake_object_order_depends_target_mpv-android: phony || CMakeFiles/mpv-android.dir
 
-build CMakeFiles/libmpv.dir/libmpv.cpp.o: CXX_COMPILER__libmpv_Debug C$:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/libmpv.cpp || cmake_object_order_depends_target_libmpv
-  DEFINES = -Dlibmpv_EXPORTS
-  DEP_FILE = CMakeFiles\libmpv.dir\libmpv.cpp.o.d
+build CMakeFiles/mpv-android.dir/main.cpp.o: CXX_COMPILER__mpv-android_Debug C$:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/main.cpp || cmake_object_order_depends_target_mpv-android
+  DEFINES = -Dmpv_android_EXPORTS
+  DEP_FILE = CMakeFiles\mpv-android.dir\main.cpp.o.d
   FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info  -fPIC
-  OBJECT_DIR = CMakeFiles\libmpv.dir
-  OBJECT_FILE_DIR = CMakeFiles\libmpv.dir
-  TARGET_COMPILE_PDB = CMakeFiles\libmpv.dir\
-  TARGET_PDB = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\liblibmpv.pdb
+  INCLUDES = -IC:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../../../../buildscripts/prefix/x86/include
+  OBJECT_DIR = CMakeFiles\mpv-android.dir
+  OBJECT_FILE_DIR = CMakeFiles\mpv-android.dir
+  TARGET_COMPILE_PDB = CMakeFiles\mpv-android.dir\
+  TARGET_PDB = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\libmpv-android.pdb
 
 
 # =============================================================================
-# Link build statements for SHARED_LIBRARY target libmpv
+# Link build statements for SHARED_LIBRARY target mpv-android
 
 
 #############################################
-# Link the shared library C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\liblibmpv.so
+# Link the shared library C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\libmpv-android.so
 
-build C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/liblibmpv.so: CXX_SHARED_LIBRARY_LINKER__libmpv_Debug CMakeFiles/libmpv.dir/libmpv.cpp.o
+build C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/libmpv-android.so: CXX_SHARED_LIBRARY_LINKER__mpv-android_Debug CMakeFiles/mpv-android.dir/main.cpp.o | C$:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../jniLibs/x86/libmpv.so C$:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../../../../buildscripts/prefix/x86/lib/libavcodec.so
   LANGUAGE_COMPILE_FLAGS = -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fno-limit-debug-info
   LINK_FLAGS = -static-libstdc++ -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--fatal-warnings -Wl,--gc-sections -Wl,--no-undefined -Qunused-arguments
-  LINK_LIBRARIES = -landroid  -llog  -latomic -lm
-  OBJECT_DIR = CMakeFiles\libmpv.dir
+  LINK_LIBRARIES = C:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../jniLibs/x86/libmpv.so  C:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../../../../buildscripts/prefix/x86/lib/libavcodec.so  -llog  -latomic -lm
+  OBJECT_DIR = CMakeFiles\mpv-android.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
-  SONAME = liblibmpv.so
+  SONAME = libmpv-android.so
   SONAME_FLAG = -Wl,-soname,
-  TARGET_COMPILE_PDB = CMakeFiles\libmpv.dir\
-  TARGET_FILE = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\liblibmpv.so
-  TARGET_PDB = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\liblibmpv.pdb
+  TARGET_COMPILE_PDB = CMakeFiles\mpv-android.dir\
+  TARGET_FILE = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\libmpv-android.so
+  TARGET_PDB = C:\dev\projects\libmpv-android\libmpv-android\build\intermediates\cxx\Debug\4w1j5we3\obj\x86\libmpv-android.pdb
 
 
 #############################################
@@ -105,9 +106,9 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build liblibmpv.so: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/liblibmpv.so
+build libmpv-android.so: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/libmpv-android.so
 
-build libmpv: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/liblibmpv.so
+build mpv-android: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/libmpv-android.so
 
 # =============================================================================
 # Folder targets.
@@ -117,7 +118,7 @@ build libmpv: phony C$:/dev/projects/libmpv-android/libmpv-android/build/interme
 #############################################
 # Folder: C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86
 
-build all: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/liblibmpv.so
+build all: phony C$:/dev/projects/libmpv-android/libmpv-android/build/intermediates/cxx/Debug/4w1j5we3/obj/x86/libmpv-android.so
 
 # =============================================================================
 # Built-in targets

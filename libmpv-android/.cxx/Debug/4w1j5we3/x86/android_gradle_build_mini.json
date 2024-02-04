@@ -17,11 +17,14 @@
     "{LIST_OF_TARGETS_TO_BUILD}"
   ],
   "libraries": {
-    "libmpv::@6890427a1f51a3e7e1df": {
-      "artifactName": "libmpv",
+    "mpv-android::@6890427a1f51a3e7e1df": {
+      "artifactName": "mpv-android",
       "abi": "x86",
-      "output": "C:\\dev\\projects\\libmpv-android\\libmpv-android\\build\\intermediates\\cxx\\Debug\\4w1j5we3\\obj\\x86\\liblibmpv.so",
-      "runtimeFiles": []
+      "output": "C:\\dev\\projects\\libmpv-android\\libmpv-android\\build\\intermediates\\cxx\\Debug\\4w1j5we3\\obj\\x86\\libmpv-android.so",
+      "runtimeFiles": [
+        "C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\jniLibs\\x86\\libmpv.so",
+        "C:\\dev\\projects\\libmpv-android\\buildscripts\\prefix\\x86\\lib\\libavcodec.so"
+      ]
     }
   }
 }

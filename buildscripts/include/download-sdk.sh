@@ -12,11 +12,12 @@ if [ "$os" == "linux" ]; then
 		hash yum &>/dev/null && {
 			sudo yum install autoconf pkgconfig libtool ninja-build \
 			python3-pip python3-setuptools unzip wget;
-			python3 -m pip install meson; }
+			python3 -m pip install meson jsonschema jinja2; }
 		apt-get -v &>/dev/null && {
-			sudo apt-get install autoconf pkg-config libtool ninja-build \
+		    sudo apt-get update;
+			sudo apt-get install -y autoconf pkg-config libtool ninja-build nasm \
 			python3-pip python3-setuptools unzip;
-			python3 -m pip install meson; }
+			python3 -m pip install meson jsonschema jinja2; }
 	fi
 
 	if ! javac -version &>/dev/null; then
@@ -49,7 +50,6 @@ mkdir -p sdk && cd sdk
 
 # Android SDK
 if [ ! -d "android-sdk-${os}" ]; then
-	echo "Android SDK not found. Downloading commandline tools."
 	$WGET "https://dl.google.com/android/repository/commandlinetools-${os}-${v_sdk}.zip"
 	mkdir "android-sdk-${os}"
 	unzip -q -d "android-sdk-${os}" "commandlinetools-${os}-${v_sdk}.zip"
@@ -61,29 +61,10 @@ sdkmanager () {
 	"$exe" --sdk_root="${ANDROID_HOME}" "$@"
 }
 echo y | sdkmanager \
-	"platforms;android-${v_sdk_platform}" "build-tools;${v_sdk_build_tools}" \
-	"extras;android;m2repository"
-
-# Android NDK (either standalone or installed by SDK)
-if [ -d "android-ndk-${v_ndk}" ]; then
-	echo "Android NDK directory found."
-elif [ -d "android-sdk-$os/ndk/${v_ndk_n}" ]; then
-	echo "Creating NDK symlink to SDK."
-	ln -s "android-sdk-$os/ndk/${v_ndk_n}" "android-ndk-${v_ndk}"
-elif [ -z "${os_ndk}" ]; then
-	echo "Downloading NDK with sdkmanager."
-	echo y | sdkmanager "ndk;${v_ndk_n}"
-	ln -s "android-sdk-$os/ndk/${v_ndk_n}" "android-ndk-${v_ndk}"
-else
-	echo "Downloading NDK."
-	$WGET "http://dl.google.com/android/repository/android-ndk-${v_ndk}-${os_ndk}.zip"
-	unzip -q "android-ndk-${v_ndk}-${os_ndk}.zip"
-	rm "android-ndk-${v_ndk}-${os_ndk}.zip"
-fi
-if ! grep -qF "${v_ndk_n}" "android-ndk-${v_ndk}/source.properties"; then
-	echo "Error: NDK exists but is not the correct version (expecting ${v_ndk_n})"
-	exit 255
-fi
+	"platforms;android-34" \
+	"build-tools;${v_sdk_build_tools}" \
+	"ndk;${v_ndk}" \
+	"cmake;3.22.1"
 
 # gas-preprocessor
 mkdir -p bin

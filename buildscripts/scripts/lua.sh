@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+. ../../include/depinfo.sh
 . ../../include/path.sh
 
 if [ "$1" == "build" ]; then
@@ -14,19 +15,10 @@ fi
 # Building seperately from source tree is not supported, this means we are forced to always clean
 $0 clean
 
-mycflags=(
-	# ensures correct linking into libmpv.so
-	-fPIC
-	# bionic is missing decimal_point in localeconv [src/llex.c]
-	-Dgetlocaledecpoint\\\(\\\)=\\\(46\\\)
-	# force fallback as ftello/fseeko are not defined [src/liolib.c]
-	-Dlua_fseek
-)
-
 # LUA_T= and LUAC_T= to disable building lua & luac
 # -Dgetlocaledecpoint()=('.') fixes bionic missing decimal_point in localeconv
 make CC="$CC" AR="$AR rc" RANLIB="$RANLIB" \
-	MYCFLAGS="${mycflags[*]}" \
+	MYCFLAGS="-fPIC -Dgetlocaledecpoint\(\)=\(\'.\'\)" \
 	PLAT=linux LUA_T= LUAC_T= -j$cores
 
 # TO_BIN=/dev/null disables installing lua & luac
