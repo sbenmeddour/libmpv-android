@@ -48,6 +48,9 @@ android {
 
 dependencies {
 
+    implementation(
+        files("../libmpv-android/build/outputs/aar/libmpv-android-debug.aar"),
+    )
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

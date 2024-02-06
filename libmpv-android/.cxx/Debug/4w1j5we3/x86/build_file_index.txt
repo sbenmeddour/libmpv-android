@@ -1,1 +1,0 @@
-C:\dev\projects\libmpv-android\libmpv-android\src\main\cpp\CMakeLists.txt

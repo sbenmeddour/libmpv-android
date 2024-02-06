@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
 . ./include/depinfo.sh
-
 . ./include/path.sh # load $os var
 
 [ -z "$TRAVIS" ] && TRAVIS=0 # skip steps not required for CI?

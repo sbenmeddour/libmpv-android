@@ -6,7 +6,15 @@ plugins {
 android {
     namespace = "fr.nextv.libmpv"
     compileSdk = 34
-
+    buildToolsVersion = "34.0.0"
+    ndkVersion = "26.1.10909125"
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("x86_64")
+        }
+    }
     defaultConfig {
         minSdk = 21
 
@@ -14,9 +22,9 @@ android {
         consumerProguardFiles("consumer-rules.pro")
         externalNativeBuild {
             cmake {
-                arguments.add("-DANDROID_STL=c++_shared")
-                cFlags.add("-Werror")
-                cppFlags.add("-std=c++11")
+                arguments += "-DANDROID_STL=c++_shared"
+                cFlags += "-Werror"
+                cppFlags += "-std=c++11"
             }
         }
     }
@@ -36,6 +44,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            ndk {
+                abiFilters.clear()
+                abiFilters.add("x86_64")
+            }
         }
     }
     externalNativeBuild {

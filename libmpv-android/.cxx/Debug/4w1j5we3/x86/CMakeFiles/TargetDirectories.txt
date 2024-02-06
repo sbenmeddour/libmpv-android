@@ -1,3 +1,0 @@
-C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86/CMakeFiles/mpv-android.dir
-C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86/CMakeFiles/edit_cache.dir
-C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/4w1j5we3/x86/CMakeFiles/rebuild_cache.dir

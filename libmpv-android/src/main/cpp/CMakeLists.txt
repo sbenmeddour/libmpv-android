@@ -5,7 +5,7 @@ project("libmpv-android")
 add_library(
     mpv-android
     SHARED
-    main.cpp
+    main.cpp player.cpp
 )
 
 add_library(

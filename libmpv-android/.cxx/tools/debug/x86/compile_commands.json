@@ -1,7 +1,0 @@
-[
-{
-  "directory": "C:/dev/projects/libmpv-android/libmpv-android/.cxx/Debug/1c16p2h4/x86",
-  "command": "C:\\Users\\samy\\AppData\\Local\\Android\\Sdk\\ndk\\25.1.8937393\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=i686-none-linux-android21 --sysroot=C:/Users/samy/AppData/Local/Android/Sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dmpv_android_EXPORTS -IC:/dev/projects/libmpv-android/libmpv-android/src/main/cpp/../../../../buildscripts/prefix/x86/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++11 -fno-limit-debug-info  -fPIC -o CMakeFiles\\mpv-android.dir\\main.cpp.o -c C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\cpp\\main.cpp",
-  "file": "C:\\dev\\projects\\libmpv-android\\libmpv-android\\src\\main\\cpp\\main.cpp"
-}
-]

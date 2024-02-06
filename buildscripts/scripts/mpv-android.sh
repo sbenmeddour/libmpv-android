@@ -10,7 +10,7 @@ MPV_ANDROID="$DIR/../.."
 if [ "$1" == "build" ]; then
 	true
 elif [ "$1" == "clean" ]; then
-	rm -rf $MPV_ANDROID/{libmpv,.}/build $MPV_ANDROID/libmpv/src/main/{libs,obj}
+	rm -rf $MPV_ANDROID/{libmpv-android,.}/build $MPV_ANDROID/libmpv-android/src/main/{libs,obj}
 	exit 0
 else
 	exit 255
@@ -24,4 +24,4 @@ nativeprefix () {
 	fi
 }
 
-./gradlew assembleRelease
+./gradlew libmpv-android:assembleDebug
