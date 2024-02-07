@@ -21,15 +21,15 @@ import kotlin.math.min
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-public fun MpvPlayer.command(command: String) = nativePlayer.command(command)
-public fun MpvPlayer.command(parts: Array<String?>) = nativePlayer.command(parts)
+fun MpvPlayer.command(command: String) = nativePlayer.command(command)
+fun MpvPlayer.command(parts: Array<String?>) = nativePlayer.command(parts)
 
-public fun MpvPlayer.play() = nativePlayer.command("set pause no")
-public fun MpvPlayer.pause() = nativePlayer.command("set pause yes")
-public fun MpvPlayer.playPause() = nativePlayer.command("cycle pause")
-public fun MpvPlayer.stop() = nativePlayer.command("stop")
+fun MpvPlayer.play() = nativePlayer.command("set pause no")
+fun MpvPlayer.pause() = nativePlayer.command("set pause yes")
+fun MpvPlayer.playPause() = nativePlayer.command("cycle pause")
+fun MpvPlayer.stop() = nativePlayer.command("stop")
 
-public fun MpvPlayer.setMediaSource(start: Duration, end: Duration, url: String): LibMpv.Result {
+fun MpvPlayer.setMediaSource(start: Duration, end: Duration, url: String): LibMpv.Result {
   return nativePlayer.command(
     command = buildString {
       append("loadfile")
@@ -52,36 +52,36 @@ public fun MpvPlayer.setMediaSource(start: Duration, end: Duration, url: String)
   )
 }
 
-public fun MpvPlayer.onSurfaceSizeChanged(width: Int, height: Int): LibMpv.Result {
+fun MpvPlayer.onSurfaceSizeChanged(width: Int, height: Int): LibMpv.Result {
   return this.nativePlayer.setProperty("android-surface-size", "${width}x${height}")
 }
 
-public fun MpvPlayer.onSurfaceCreated(surface: Surface) {
+fun MpvPlayer.onSurfaceCreated(surface: Surface) {
   this.onSurfaceDestroyed()
   this.nativePlayer.attachAndroidSurface(surface)
   this.nativePlayer.setOption("force-window", "yes")
   this.nativePlayer.setProperty("vo", configuration.rendering.output.rawValue)
 }
 
-public fun MpvPlayer.onSurfaceDestroyed() {
+fun MpvPlayer.onSurfaceDestroyed() {
   this.nativePlayer.setProperty("vo", "null")
   this.nativePlayer.setOption("force-window", "no")
   this.nativePlayer.detachAndroidSurface()
 }
 
-public val MpvPlayer.isPlaying: Boolean
+val MpvPlayer.isPlaying: Boolean
   get() = nativePlayer.getPropertyBoolean("pause")?.not() ?: false
 
-public val MpvPlayer.isSeeking: Boolean
+val MpvPlayer.isSeeking: Boolean
   get() = nativePlayer.getPropertyBoolean("seeking") ?: false
 
-public val MpvPlayer.isSeekable: Boolean
+val MpvPlayer.isSeekable: Boolean
   get() = nativePlayer.getPropertyBoolean("seekable") ?: false
 
-public val MpvPlayer.playbackPosition: Duration
+val MpvPlayer.playbackPosition: Duration
   get() = nativePlayer.getPropertyInt("time-pos")?.seconds ?: Duration.ZERO
 
-public val MpvPlayer.playbackDuration: Duration
+val MpvPlayer.playbackDuration: Duration
   get() = nativePlayer.getPropertyInt("duration")?.seconds ?: Duration.ZERO
 
 fun MpvPlayer.setOption(key: String, value: String) = nativePlayer.setOption(key, value)
@@ -90,15 +90,15 @@ fun MpvPlayer.setProperty(key: String, value: Int) = nativePlayer.setProperty(ke
 fun MpvPlayer.setProperty(key: String, value: Double) = nativePlayer.setProperty(key, value)
 fun MpvPlayer.setProperty(key: String, value: Boolean) = nativePlayer.setProperty(key, value)
 
-public fun MpvPlayer.observeProperty(key: String, format: LibMpv.Format) = this.nativePlayer.observeProperty(key, format)
+fun MpvPlayer.observeProperty(key: String, format: LibMpv.Format) = this.nativePlayer.observeProperty(key, format)
 
-public fun Boolean?.asTripleState(): LibMpv.TripleState = when (this) {
+fun Boolean?.asTripleState(): LibMpv.TripleState = when (this) {
   true -> LibMpv.TripleState.Yes
   false -> LibMpv.TripleState.No
   null -> LibMpv.TripleState.Unknown
 }
 
-public val LibMpv.Track.Video.aspectRatio: Float?
+val LibMpv.Track.Video.aspectRatio: Float?
   get() {
     val largest = max(width, height)
     val smallest = min(width, height)
@@ -108,13 +108,13 @@ public val LibMpv.Track.Video.aspectRatio: Float?
     return largest.toFloat() / smallest.toFloat()
   }
 
-public val MpvPlayer.tracks: List<LibMpv.Track>
+val MpvPlayer.tracks: List<LibMpv.Track>
   get() = nativePlayer.getPropertyString("track-list")
     .orEmpty()
     .let(::parseTracks)
     .getOrElse { emptyList() }
 
-public fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
+fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
   if (tracks.isBlank()) {
     return@runCatching emptyList<LibMpv.Track>()
   }
@@ -174,11 +174,11 @@ public fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching
     }
 }
 
-public fun MpvPlayer.setVideoTrack(track: LibMpv.Track.Video?) = nativePlayer.command("set vid ${track?.id ?: "no"}")
-public fun MpvPlayer.setAudioTrack(track: LibMpv.Track.Audio?) = nativePlayer.command("set aid ${track?.id ?: "no"}")
-public fun MpvPlayer.setSubtitlesTrack(track: LibMpv.Track.Text?) = nativePlayer.command("set sid ${track?.id ?: "no"}")
+fun MpvPlayer.setVideoTrack(track: LibMpv.Track.Video?) = nativePlayer.command("set vid ${track?.id ?: "no"}")
+fun MpvPlayer.setAudioTrack(track: LibMpv.Track.Audio?) = nativePlayer.command("set aid ${track?.id ?: "no"}")
+fun MpvPlayer.setSubtitlesTrack(track: LibMpv.Track.Text?) = nativePlayer.command("set sid ${track?.id ?: "no"}")
 
-public fun MpvPlayer.seekTo(position: Duration, fast: Boolean) = nativePlayer.command(
+fun MpvPlayer.seekTo(position: Duration, fast: Boolean) = nativePlayer.command(
   command = buildString {
     append("seek ${position.inWholeSeconds} absolute")
     if (fast) {
@@ -189,7 +189,7 @@ public fun MpvPlayer.seekTo(position: Duration, fast: Boolean) = nativePlayer.co
   }
 )
 
-public fun MpvPlayer.forwardBy(position: Duration, fast: Boolean) = nativePlayer.command(
+fun MpvPlayer.forwardBy(position: Duration, fast: Boolean) = nativePlayer.command(
   command = buildString {
     append("seek ${position.inWholeSeconds} relative")
     if (fast) {
@@ -200,7 +200,7 @@ public fun MpvPlayer.forwardBy(position: Duration, fast: Boolean) = nativePlayer
   }
 )
 
-public fun MpvPlayer.rewindBy(position: Duration, fast: Boolean) = nativePlayer.command(
+fun MpvPlayer.rewindBy(position: Duration, fast: Boolean) = nativePlayer.command(
   command = buildString {
     append("seek -${position.inWholeSeconds} relative")
     if (fast) {

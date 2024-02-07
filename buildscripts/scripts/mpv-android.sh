@@ -25,3 +25,4 @@ nativeprefix () {
 }
 
 ./gradlew libmpv-android:assembleDebug
+./gradlew libmpv-android:assembleRelease

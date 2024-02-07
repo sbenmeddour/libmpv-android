@@ -9,13 +9,6 @@ android {
     compileSdk = 34
     buildToolsVersion = "34.0.0"
     ndkVersion = "26.1.10909125"
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include("x86_64")
-        }
-    }
     defaultConfig {
         minSdk = 21
 
@@ -46,12 +39,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-        debug {
-            ndk {
-                abiFilters.clear()
-                abiFilters.add("x86_64")
-            }
-        }
     }
     externalNativeBuild {
         cmake {
@@ -69,6 +56,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(libs.junit)

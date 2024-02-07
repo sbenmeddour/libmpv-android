@@ -1,5 +1,8 @@
 package fr.nextv.libmpv
 
+import androidx.annotation.Keep
+
+@Keep
 object LibMpv {
 
   internal const val TAG = "LibMpv"

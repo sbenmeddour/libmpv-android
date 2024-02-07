@@ -15,14 +15,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 
-public class MpvPlayer(public val configuration: MpvConfiguration) {
+class MpvPlayer(val configuration: MpvConfiguration) {
 
   private val eventThread = Executors.newFixedThreadPool(1).asCoroutineDispatcher()
   private val scope = CoroutineScope(context = eventThread + CoroutineName("MPV EVENT POLLING SCOPE"))
 
   internal val nativePlayer = MpvPlayerJni()
 
-  public fun interface EventListener {
+  fun interface EventListener {
     fun onEvent(event: LibMpv.PlayerEvent)
   }
 
@@ -49,7 +49,7 @@ public class MpvPlayer(public val configuration: MpvConfiguration) {
     }
   }
 
-  public fun release() {
+  fun release() {
     eventPollTask.cancel()
     scope.cancel()
     eventThread.close()
@@ -58,9 +58,9 @@ public class MpvPlayer(public val configuration: MpvConfiguration) {
     nativePlayer.destroyNativePlayer()
   }
 
-  public fun registerEventListener(listener: EventListener) = listeners.add(listener)
+  fun registerEventListener(listener: EventListener) = listeners.add(listener)
 
-  public fun unregisterEventListener(listener: EventListener) = listeners.remove(listener)
+  fun unregisterEventListener(listener: EventListener) = listeners.remove(listener)
 
   private fun onEvent(event: LibMpv.PlayerEvent) {
     for (listener in listeners) {

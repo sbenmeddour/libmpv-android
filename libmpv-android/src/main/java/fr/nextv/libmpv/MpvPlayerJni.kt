@@ -1,7 +1,9 @@
 package fr.nextv.libmpv
 
 import android.view.Surface
+import androidx.annotation.Keep
 
+@Keep
 internal class MpvPlayerJni {
 
   private var currentSurface: Long = 0
