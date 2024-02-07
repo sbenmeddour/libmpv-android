@@ -2,6 +2,8 @@ package fr.nextv.libmpv
 
 object LibMpv {
 
+  internal const val TAG = "LibMpv"
+
   private var initialized = false
 
   fun initializeLibMpv() {
@@ -43,6 +45,7 @@ object LibMpv {
     StartFile(6),
     EndFile(7),
     FileLoaded(8),
+    Idle(11),
     ClientMessage(16),
     VideoReconfig(17),
     AudioReconfig(18),
@@ -50,7 +53,11 @@ object LibMpv {
     Restart(21),
     PropertyChange(22),
     QueueOverflow(24),
-    EventHook(25),
+    EventHook(25);
+
+    internal companion object {
+      val cache = entries.associateBy { it.nativeValue }
+    }
   }
 
   enum class LogLevel(val nativeValue: Int) {
@@ -64,18 +71,54 @@ object LibMpv {
     Trace(70),
   }
 
+  enum class Result(internal val nativeCode: Int) {
+    Success(0),
+    ErrorEventQueueFull(-1),
+    ErrorNoMem(-2),
+    ErrorUninitialized(-3),
+    ErrorInvalidParameter(-4),
+    ErrorOptionNotFound(-5),
+    ErrorOptionFormat(-6),
+    ErrorOptionError(-7),
+    ErrorPropertyNotFound(-8),
+    ErrorPropertyFormat(-9),
+    ErrorPropertyUnavailable(-10),
+    ErrorPropertyError(-11),
+    ErrorCommand(-12),
+    ErrorLoadingFailed(-13),
+    ErrorAoInitFailed(-14),
+    ErrorVoInitFailed(-15),
+    ErrorNothingToPlay(-16),
+    ErrorUnknownFormat(-17),
+    ErrorUnsupported(-18),
+    ErrorNotImplemented(-19),
+    ErrorGeneric(-20);
+
+    interface Cache {
+      operator fun get(nativeCode: Int): Result
+    }
+
+    companion object {
+      val cache = object : Cache {
+        private val _cache = entries.associateBy { it.nativeCode }
+        override fun get(nativeCode: Int) = _cache.getOrElse(nativeCode) { ErrorGeneric }
+      }
+    }
+
+  }
+
   enum class TripleState { Yes, No, Unknown }
 
   sealed interface Track {
 
-    val id: String
+    val id: Int
     val selected: Boolean
     val codec: String
     val codecDescription: String
     val default: TripleState
 
     data class Video(
-      override val id: String,
+      override val id: Int,
       override val selected: Boolean,
       override val codec: String,
       override val codecDescription: String,
@@ -86,7 +129,7 @@ object LibMpv {
     ) : Track
 
     data class Audio(
-      override val id: String,
+      override val id: Int,
       override val selected: Boolean,
       override val codec: String,
       override val codecDescription: String,
@@ -95,18 +138,25 @@ object LibMpv {
     ) : Track
 
     data class Text(
-      override val id: String,
+      override val id: Int,
       override val selected: Boolean,
       override val codec: String,
       override val codecDescription: String,
       override val default: TripleState,
       val forced: TripleState,
       val name: String,
+      val lang: String?,
     ) : Track
 
   }
 
-  data class PlayerEvent(val event: Event, val data: EventData)
+  data class PlayerEvent internal constructor(private val eventOrdinal: Int, val data: EventData) {
+
+    val event: Event get() = Event.cache.getOrElse(eventOrdinal) { Event.None }
+
+    override fun toString() = "PlayerEvent(data=$data, event=$event)"
+
+  }
 
   sealed interface EventData
 

@@ -27,7 +27,6 @@ Java_fr_nextv_libmpv_LibMpv_initializeMpvEngine(JNIEnv *env, jobject thiz) {
   __android_log_print(ANDROID_LOG_INFO, TAG, "initializeMpvEngine invoked");
   auto initializationResult = av_jni_set_java_vm(javaVmUniqueReference, nullptr);
   __android_log_print(ANDROID_LOG_INFO, TAG, "av_jni_set_java_vm result code: %d", initializationResult);
-
 }
 
 extern "C"
