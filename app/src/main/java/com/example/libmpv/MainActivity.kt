@@ -5,6 +5,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,8 +94,12 @@ class MainActivity : ComponentActivity() {
         println("Setting media source")
         withContext(Dispatchers.Main) {
           val url = "https://github.com/ietf-wg-cellar/matroska-test-files/raw/master/test_files/test5.mkv"
-          val result = player.setMediaSource(start = 10.seconds, end = 20.seconds, url = url)
+          val result = player.setMediaSource(start = Duration.ZERO, end = Duration.ZERO, url = url)
           println("result = ${result.name}")
+          delay(2000)
+
+          val subRes = player.command("set sid 3")
+          println("subRes = ${subRes}")
         }
       }
       Box(
@@ -102,7 +107,11 @@ class MainActivity : ComponentActivity() {
         contentAlignment = Alignment.Center,
         content = {
           AndroidView(
-            modifier = Modifier.aspectRatio(aspectRatio),
+            modifier = Modifier
+              .aspectRatio(aspectRatio)
+              .clickable {
+                         player.playPause()
+              },
             factory = {
               SurfaceView(it).apply {
                 holder.addCallback(callback)

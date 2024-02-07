@@ -2,8 +2,31 @@
 #include <string>
 #include <mpv/client.h>
 #include <android/log.h>
+extern "C" {
+  #include <libavcodec/jni.h>
+}
 
-auto PLAYER_TAG = "mpv-android (player)";
+auto PLAYER_TAG = "mpv-android";
+
+JavaVM* javaVmUniqueReference = nullptr;
+
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
+  __android_log_print(ANDROID_LOG_INFO, PLAYER_TAG, "JNI_OnLoad invoked");
+  javaVmUniqueReference = vm;
+  av_jni_set_java_vm(javaVmUniqueReference, nullptr);
+  return JNI_VERSION_1_6;
+}
+
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved) {
+  __android_log_print(ANDROID_LOG_INFO, PLAYER_TAG, "JNI_OnUnload invoked");
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_fr_nextv_libmpv_LibMpv_createMpvHandle(JNIEnv *env, jobject thiz) {
+  auto newMpvHandle = mpv_create();
+  return reinterpret_cast<jlong>(newMpvHandle);
+}
 
 mpv_handle *getHandle(JNIEnv *env, jobject mpvPlayerJni) {
   auto classObject = env->GetObjectClass(mpvPlayerJni);

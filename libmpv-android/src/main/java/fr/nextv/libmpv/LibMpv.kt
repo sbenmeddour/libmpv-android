@@ -11,13 +11,11 @@ object LibMpv {
     try {
       System.loadLibrary("mpv")
       System.loadLibrary("mpv-android")
-      initializeMpvEngine()
     } finally {
       initialized = true
     }
   }
 
-  private external fun initializeMpvEngine()
   private external fun createMpvHandle(): Long
 
   internal fun createMpvHandleInternal() = createMpvHandle()
