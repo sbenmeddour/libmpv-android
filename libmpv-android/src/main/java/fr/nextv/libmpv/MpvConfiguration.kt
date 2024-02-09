@@ -1,6 +1,11 @@
 package fr.nextv.libmpv
 
+import java.util.UUID
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+
 class MpvConfiguration(
+  val playerName: String = UUID.randomUUID().toString(),
   val rendering: Rendering = VideoOutput.MediaCodecEmbed + HardwareDecoding.MediaCodec,
   val gpuContext: GpuContext = GpuContext.Android,
   val gpuApi: GpuApi = GpuApi.Auto,
@@ -9,6 +14,7 @@ class MpvConfiguration(
   val demuxerBackMaxMb: Int = 8,
   val otherOptions: Map<String, String> = emptyMap(),
   val hardwareCodecsWhiteList: List<String> = emptyList(),
+  val eventPollRate: Duration = 200.milliseconds,
 ) {
 
   class Rendering internal constructor(val output: VideoOutput, val decoding: HardwareDecoding)

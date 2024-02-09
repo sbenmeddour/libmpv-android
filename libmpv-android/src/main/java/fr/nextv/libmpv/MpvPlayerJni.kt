@@ -32,14 +32,15 @@ internal class MpvPlayerJni {
   private external fun attachSurface(javaSurface: Surface): Int
   private external fun detachSurface(): Int
 
-  private external fun destroy()
+  external fun destroy()
 
-  external fun awaitNextEvent(): LibMpv.PlayerEvent
+  external fun awaitNextEvent(): LibMpv.Event
+
+  external fun cancelCurrentAwaitNextEvent()
 
   companion object {
 
     internal fun MpvPlayerJni.initializeNativePlayer() = LibMpv.Result.cache[initialize()]
-    internal fun MpvPlayerJni.destroyNativePlayer() = destroy()
 
     internal fun MpvPlayerJni.setOption(key: String, value: String) = LibMpv.Result.cache[setOptionString(key, value)]
 

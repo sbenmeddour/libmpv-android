@@ -5,7 +5,7 @@ import androidx.annotation.Keep
 @Keep
 object LibMpv {
 
-  internal const val TAG = "LibMpv"
+  internal const val TAG = "mpv-android"
 
   private var initialized = false
 
@@ -23,7 +23,7 @@ object LibMpv {
 
   internal fun createMpvHandleInternal() = createMpvHandle()
 
-  enum class Format(val nativeValue: kotlin.Int) {
+  enum class Format(internal val nativeValue: kotlin.Int) {
     None(0),
     String(1),
     OsdString(2),
@@ -36,28 +36,86 @@ object LibMpv {
     ByteArray(9),
   }
 
-  enum class Event(val nativeValue: Int) {
-    None(0),
-    ShutDown(1),
-    LogMessage(2),
-    GetPropertyReply(3),
-    SetPropertyReply(4),
-    CommandReply(5),
-    StartFile(6),
-    EndFile(7),
-    FileLoaded(8),
-    Idle(11),
-    ClientMessage(16),
-    VideoReconfig(17),
-    AudioReconfig(18),
-    Seek(20),
-    Restart(21),
-    PropertyChange(22),
-    QueueOverflow(24),
-    EventHook(25);
+  enum class EndFileReason(internal val nativeValue: Int) {
+    EndOfFile(0),
+    Stop(2),
+    Quit(3),
+    Error(4),
+    Redirect(5),
+  }
 
-    internal companion object {
-      val cache = entries.associateBy { it.nativeValue }
+
+  sealed interface Event {
+
+    data class PropertyChange private constructor(val name: String, val value: Value) : Event
+    data class LogMessage private constructor(val level: Int, val prefix: String, val text: String) : Event
+    data class StartFile private constructor(val playlistEntryId: Int) : Event
+    data class EndFile private constructor(private val nativeReason: Int, private val nativeError: Int, val entryId: Int, val insertId: Int) : Event {
+
+      val reason: EndFileReason
+        get() = EndFileReason.entries
+          .firstOrNull { it.nativeValue == nativeReason }
+          ?: EndFileReason.EndOfFile
+
+      val error: Result
+        get() = Result.cache[nativeError]
+
+
+    }
+
+    enum class SimpleEvent : Event {
+
+      CommandReply,
+      GetPropertyReply,
+      SetPropertyReply,
+      None,
+      Shutdown,
+      FileLoaded,
+      Idle,
+      Tick,
+      Seek,
+      VideoReconfig,
+      AudioReconfig,
+      PlaybackRestart,
+      QueueOverflow,
+      ClientMessage,
+      Hook;
+
+      companion object {
+
+        @JvmStatic
+        val Event.nativeCode: Int
+          get() = when (this) {
+            None -> 0
+            Shutdown -> 1
+            is LogMessage -> 2
+            GetPropertyReply -> 3
+            SetPropertyReply -> 4
+            CommandReply -> 5
+            is EndFile -> 7
+            is StartFile -> 6
+            FileLoaded -> 8
+            Idle -> 11
+            Tick -> 14
+            ClientMessage -> 16
+            VideoReconfig -> 17
+            AudioReconfig -> 18
+            Seek -> 20
+            PlaybackRestart -> 21
+            is PropertyChange -> 22
+            QueueOverflow -> 24
+            Hook -> 25
+          }
+
+        @JvmStatic
+        private val cache = SimpleEvent.entries.associateBy { it.nativeCode }
+
+        @JvmStatic
+        private fun fromNativeCode(value: Int): SimpleEvent {
+          return cache[value] ?: None
+        }
+      }
+
     }
   }
 
@@ -118,7 +176,7 @@ object LibMpv {
     val codecDescription: String
     val default: TripleState
 
-    data class Video(
+    data class Video internal constructor(
       override val id: Int,
       override val selected: Boolean,
       override val codec: String,
@@ -129,7 +187,7 @@ object LibMpv {
       val fps: Float,
     ) : Track
 
-    data class Audio(
+    data class Audio internal constructor(
       override val id: Int,
       override val selected: Boolean,
       override val codec: String,
@@ -138,7 +196,7 @@ object LibMpv {
       val name: String,
     ) : Track
 
-    data class Text(
+    data class Text internal constructor(
       override val id: Int,
       override val selected: Boolean,
       override val codec: String,
@@ -151,24 +209,16 @@ object LibMpv {
 
   }
 
-  data class PlayerEvent internal constructor(private val eventOrdinal: Int, val data: EventData) {
-
-    val event: Event get() = Event.cache.getOrElse(eventOrdinal) { Event.None }
-
-    override fun toString() = "PlayerEvent(data=$data, event=$event)"
-
-  }
-
-  sealed interface EventData
-
-  data class Property(val name: String, val value: Value) : EventData
-
-  sealed interface Value : EventData {
+  sealed interface Value {
     data object MpvNone : Value
-    @JvmInline value class MpvDouble(val value: Float) : Value
-    @JvmInline value class MpvLong(val value: Long) : Value
-    @JvmInline value class MpvString(val value: String) : Value
-    @JvmInline value class MpvBoolean(val value: Boolean) : Value
+    @JvmInline
+    value class MpvDouble private constructor(val value: Float) : Value
+    @JvmInline
+    value class MpvLong private constructor(val value: Long) : Value
+    @JvmInline
+    value class MpvString private constructor(val value: String) : Value
+    @JvmInline
+    value class MpvBoolean private constructor(val value: Boolean) : Value
   }
 
 }
