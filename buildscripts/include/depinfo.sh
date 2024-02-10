@@ -1,5 +1,4 @@
 #!/bin/bash -e
-
 ## Dependency versions
 
 v_sdk=10406996_latest

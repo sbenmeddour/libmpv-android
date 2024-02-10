@@ -194,6 +194,8 @@ object LibMpv {
       override val codecDescription: String,
       override val default: TripleState,
       val name: String,
+      val channelCount: Int,
+      val channelLayout: String?,
     ) : Track
 
     data class Text internal constructor(

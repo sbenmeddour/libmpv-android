@@ -2,39 +2,16 @@ package com.example.libmpv
 
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.FastForward
-import androidx.compose.material.icons.rounded.FastRewind
-import androidx.compose.material.icons.rounded.Pause
-import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Slider
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,21 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import fr.nextv.libmpv.LibMpv
-import fr.nextv.libmpv.MpvConfiguration
-import fr.nextv.libmpv.MpvPlayer
-import fr.nextv.libmpv.aspectRatio
-import fr.nextv.libmpv.forwardBy
-import fr.nextv.libmpv.observeProperty
-import fr.nextv.libmpv.onSurfaceCreated
-import fr.nextv.libmpv.onSurfaceDestroyed
-import fr.nextv.libmpv.onSurfaceSizeChanged
-import fr.nextv.libmpv.parseTracks
-import fr.nextv.libmpv.pause
-import fr.nextv.libmpv.playPause
-import fr.nextv.libmpv.rewindBy
-import fr.nextv.libmpv.seekTo
-import fr.nextv.libmpv.setMediaSource
+import fr.nextv.libmpv.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.time.Duration
@@ -161,7 +124,7 @@ fun PlayerScreen(url: String) {
   )
   LaunchedEffect(url) {
     withContext(Dispatchers.Main) {
-      player.setMediaSource(start = Duration.ZERO, end = Duration.ZERO, url = url)
+      player.setMediaSource(url = url)
     }
   }
   DisposableEffect(Unit) {

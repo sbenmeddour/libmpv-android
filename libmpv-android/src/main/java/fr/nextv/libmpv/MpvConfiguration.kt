@@ -9,7 +9,7 @@ class MpvConfiguration(
   val rendering: Rendering = VideoOutput.MediaCodecEmbed + HardwareDecoding.MediaCodec,
   val gpuContext: GpuContext = GpuContext.Android,
   val gpuApi: GpuApi = GpuApi.Auto,
-  val audioOutputs: List<AudioOutput> = AudioOutput.entries.toList(),
+  val audioOutputs: List<AudioOutput> = listOf(AudioOutput.AudioTrack, AudioOutput.OpenSles),
   val demuxerMaxMb: Int = 24,
   val demuxerBackMaxMb: Int = 8,
   val otherOptions: Map<String, String> = emptyMap(),
@@ -23,7 +23,11 @@ class MpvConfiguration(
   enum class HardwareDecoding { MediaCodec, MediacodecCopy, Auto, Software }
   enum class GpuContext { Android, Auto }
   enum class GpuApi { Auto, OpenGl, Vulkan }
-  enum class AudioOutput { AudioTrack, OpenSles }
+  sealed interface AudioOutput {
+    data object AudioTrack : AudioOutput
+    data object OpenSles : AudioOutput
+    @JvmInline value class Other(val value: String) : AudioOutput
+  }
 
 }
 
@@ -46,6 +50,7 @@ internal val MpvConfiguration.AudioOutput.rawValue: String
   get() = when (this) {
     MpvConfiguration.AudioOutput.AudioTrack -> "audiotrack"
     MpvConfiguration.AudioOutput.OpenSles -> "opensles"
+    is MpvConfiguration.AudioOutput.Other -> this.value
   }
 
 internal val MpvConfiguration.GpuContext.rawValue: String

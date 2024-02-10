@@ -8,17 +8,8 @@ import fr.nextv.libmpv.MpvPlayerJni.Companion.detachAndroidSurface
 import fr.nextv.libmpv.MpvPlayerJni.Companion.observeProperty
 import fr.nextv.libmpv.MpvPlayerJni.Companion.setOption
 import fr.nextv.libmpv.MpvPlayerJni.Companion.setProperty
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.float
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonPrimitive
-import kotlin.math.absoluteValue
-import kotlin.math.max
-import kotlin.math.min
+import kotlinx.serialization.json.*
+import kotlin.math.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,7 +38,7 @@ fun MpvPlayer.pause(): LibMpv.Result = ifInitialized { nativePlayer.command("set
 fun MpvPlayer.playPause(): LibMpv.Result = ifInitialized { nativePlayer.command("cycle pause") }
 fun MpvPlayer.stop(): LibMpv.Result = ifInitialized { nativePlayer.command("stop") }
 
-fun MpvPlayer.setMediaSource(start: Duration, end: Duration, url: String): LibMpv.Result {
+fun MpvPlayer.setMediaSource(start: Duration? = null, end: Duration? = null, url: String): LibMpv.Result {
   return ifInitialized {
     nativePlayer.command(
       command = buildString {
@@ -56,10 +47,10 @@ fun MpvPlayer.setMediaSource(start: Duration, end: Duration, url: String): LibMp
         append(url)
         append(" replace")
         val args = buildList {
-          if (start > Duration.ZERO) {
+          if (start != null && start > Duration.ZERO) {
             this@buildList.add("start=${start.inWholeSeconds}")
           }
-          if (end > Duration.ZERO && end > start) {
+          if (end != null && end > Duration.ZERO && (start == null || end > start)) {
             this@buildList.add("end=${end.inWholeSeconds}")
           }
         }
@@ -123,6 +114,7 @@ val MpvPlayer.playbackDuration: Duration
     block = { nativePlayer.getPropertyInt("duration/full")?.seconds ?: Duration.ZERO },
     orElse = { Duration.ZERO },
   )
+
 fun MpvPlayer.setOption(key: String, value: String): LibMpv.Result = ifInitialized { nativePlayer.setOption(key, value) }
 fun MpvPlayer.setProperty(key: String, value: String): LibMpv.Result = ifInitialized { nativePlayer.setProperty(key, value) }
 fun MpvPlayer.setProperty(key: String, value: Int): LibMpv.Result = ifInitialized { nativePlayer.setProperty(key, value) }
@@ -173,7 +165,7 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
         val codec = jsonObject["codec"]?.jsonPrimitive?.contentOrNull ?: "Unknown"
         val name = jsonObject["title"]?.jsonPrimitive?.contentOrNull ?: "Unknown"
         val default = jsonObject["default"]?.jsonPrimitive?.booleanOrNull.asTripleState()
-        val codecDescription = jsonObject["codec-description"]?.jsonPrimitive?.contentOrNull.orEmpty()
+        val codecDescription = jsonObject["decoder-desc"]?.jsonPrimitive?.contentOrNull.orEmpty()
         when (type) {
           "video" -> {
             LibMpv.Track.Video(
@@ -187,6 +179,7 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               fps = jsonObject["demux-fps"]?.jsonPrimitive?.float ?: -1f,
             )
           }
+
           "audio" -> {
             LibMpv.Track.Audio(
               id = id,
@@ -195,8 +188,17 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               codecDescription = codecDescription,
               default = default,
               name = name,
+              channelCount = runCatching {
+                jsonObject["audio-channels"]!!.jsonPrimitive.int
+              }.recoverCatching {
+                jsonObject["demux-channel-count"]!!.jsonPrimitive.int
+              }.getOrElse {
+                0
+              },
+              channelLayout = jsonObject["demux-channels"]?.jsonPrimitive?.contentOrNull,
             )
           }
+
           "sub" -> {
             LibMpv.Track.Text(
               id = id,
@@ -209,6 +211,7 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               lang = jsonObject["lang"]?.jsonPrimitive?.contentOrNull.orEmpty(),
             )
           }
+
           else -> throw IllegalArgumentException("Unknown track type: $type")
         }
       } catch (error: Throwable) {

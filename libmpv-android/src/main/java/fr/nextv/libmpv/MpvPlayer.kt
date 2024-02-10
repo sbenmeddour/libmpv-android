@@ -4,20 +4,8 @@ import android.util.Log
 import fr.nextv.libmpv.MpvPlayerJni.Companion.initializeNativePlayer
 import fr.nextv.libmpv.MpvPlayerJni.Companion.setOption
 import fr.nextv.libmpv.MpvPlayerJni.Companion.stopObserveProperties
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelAndJoin
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.concurrent.Executors
-import kotlin.math.log
 
 class MpvPlayer(val configuration: MpvConfiguration) {
 
