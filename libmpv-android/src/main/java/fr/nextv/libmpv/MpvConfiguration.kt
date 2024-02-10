@@ -44,7 +44,7 @@ internal val MpvConfiguration.HardwareDecoding.rawValue: String
 
 internal val MpvConfiguration.AudioOutput.rawValue: String
   get() = when (this) {
-    MpvConfiguration.AudioOutput.AudioTrack -> "ao"
+    MpvConfiguration.AudioOutput.AudioTrack -> "audiotrack"
     MpvConfiguration.AudioOutput.OpenSles -> "opensles"
   }
 
