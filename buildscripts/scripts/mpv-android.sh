@@ -8,20 +8,20 @@ MPV_ANDROID="$DIR/../.."
 . $BUILD/include/depinfo.sh
 
 if [ "$1" == "build" ]; then
-	true
+    true
 elif [ "$1" == "clean" ]; then
-	rm -rf $MPV_ANDROID/{libmpv-android,.}/build $MPV_ANDROID/libmpv-android/src/main/{libs,obj}
-	exit 0
+    rm -rf $MPV_ANDROID/{libmpv-android,.}/build $MPV_ANDROID/libmpv-android/src/main/{libs,obj}
+    exit 0
 else
-	exit 255
+    exit 255
 fi
 
 nativeprefix () {
-	if [ -f $BUILD/prefix/$1/lib/libmpv.so ]; then
-		echo $BUILD/prefix/$1
-	else
-		echo >&2 "Warning: libmpv.so not found in native prefix for $1, support will be omitted"
-	fi
+    if [ -f $BUILD/prefix/$1/lib/libmpv.so ]; then
+        echo $BUILD/prefix/$1
+    else
+        echo >&2 "Warning: libmpv.so not found in native prefix for $1, support will be omitted"
+    fi
 }
 
 ./gradlew libmpv-android:assembleDebug

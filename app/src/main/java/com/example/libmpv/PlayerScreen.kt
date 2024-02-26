@@ -99,9 +99,11 @@ fun PlayerScreen(url: String) {
     modifier = Modifier
       .fillMaxSize()
       .background(Color.Black)
-      .clickable {
-        showControls = !showControls
-      },
+      .clickable(
+        interactionSource = remember { MutableInteractionSource() },
+        indication = null,
+        onClick = { showControls = !showControls },
+      ),
     contentAlignment = Alignment.Center,
     content = {
       PlayerView(player = player, state = playerState)

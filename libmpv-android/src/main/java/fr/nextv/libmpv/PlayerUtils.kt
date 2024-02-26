@@ -179,7 +179,6 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               fps = jsonObject["demux-fps"]?.jsonPrimitive?.float ?: -1f,
             )
           }
-
           "audio" -> {
             LibMpv.Track.Audio(
               id = id,
@@ -198,7 +197,6 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               channelLayout = jsonObject["demux-channels"]?.jsonPrimitive?.contentOrNull,
             )
           }
-
           "sub" -> {
             LibMpv.Track.Text(
               id = id,
@@ -211,7 +209,6 @@ fun parseTracks(tracks: String): Result<List<LibMpv.Track>> = runCatching {
               lang = jsonObject["lang"]?.jsonPrimitive?.contentOrNull.orEmpty(),
             )
           }
-
           else -> throw IllegalArgumentException("Unknown track type: $type")
         }
       } catch (error: Throwable) {
