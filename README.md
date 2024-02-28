@@ -20,7 +20,9 @@ cd buildscripts
 sudo ./build.sh
 ```
 - Use pre-compiled AAR:
+```
 Go to the releases page and download `libmpv-android-release.aar` and paste it to your libs dir
+```
 
 ```kotlin
 @Composable
