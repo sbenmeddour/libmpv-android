@@ -10,21 +10,128 @@ auto PLAYER_TAG = "mpv-android";
 
 JavaVM* javaVmUniqueReference = nullptr;
 
+jclass mpvStringClazz;
+jmethodID mpvStringConstructor;
+
+jclass mpvDoubleClazz;
+jmethodID mpvDoubleConstructor;
+
+jclass mpvIntClazz;
+jmethodID mpvIntConstructor;
+
+jclass mpvBoolClazz;
+jmethodID mpvBoolConstructor;
+
+jclass mpvPropertyChangeClazz;
+jmethodID mpvPropertyChangeConstructor;
+
+jclass mpvSimpleEventClazz;
+jmethodID mpvSimpleEventCreator;
+
+jclass mpvLogMessageClazz;
+jmethodID mpvLogMessageConstructor;
+
+jclass javaIntegerClazz;
+jmethodID javaIntegerConstructor;
+
+jclass javaBooleanClazz;
+jmethodID javaBooleanConstructor;
+
+jclass javaDoubleClazz;
+jmethodID javaDoubleConstructor;
+
+jobject MPV_NONE_SINGLETON;
+
+jclass newJavaClassGlobalRef(jclass javaClazz, JNIEnv* env) {
+  return reinterpret_cast<jclass>(env->NewGlobalRef(javaClazz));
+}
+
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "JNI_OnLoad invoked");
   javaVmUniqueReference = vm;
   av_jni_set_java_vm(javaVmUniqueReference, nullptr);
+
+  JNIEnv* env = nullptr;
+  vm->GetEnv((void**) &env, JNI_VERSION_1_6);
+
+  mpvStringClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvString"), env);
+  mpvStringConstructor = env->GetMethodID(mpvStringClazz, "<init>", "(Ljava/lang/String;)V");
+
+  mpvDoubleClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvDouble"), env);
+  mpvDoubleConstructor = env->GetMethodID(mpvDoubleClazz, "<init>", "(F)V");
+
+  mpvIntClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvLong"), env);
+  mpvIntConstructor = env->GetMethodID(mpvIntClazz, "<init>", "(J)V");
+
+  mpvBoolClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvBoolean"), env);
+  mpvBoolConstructor = env->GetMethodID(mpvBoolClazz, "<init>", "(Z)V");
+
+  mpvPropertyChangeClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Event$PropertyChange"), env);
+  mpvPropertyChangeConstructor = env->GetMethodID(mpvPropertyChangeClazz, "<init>", "(Ljava/lang/String;Lfr/nextv/libmpv/LibMpv$Value;)V");
+
+  mpvSimpleEventClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Event$SimpleEvent"), env);
+  mpvSimpleEventCreator = env->GetStaticMethodID(mpvSimpleEventClazz, "fromNativeCode", "(I)Lfr/nextv/libmpv/LibMpv$Event$SimpleEvent;");
+
+  mpvLogMessageClazz = newJavaClassGlobalRef(env->FindClass("fr/nextv/libmpv/LibMpv$Event$LogMessage"), env);
+  mpvLogMessageConstructor = env->GetMethodID(mpvLogMessageClazz, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
+
+  javaIntegerClazz = newJavaClassGlobalRef(env->FindClass("java/lang/Integer"), env);
+  javaIntegerConstructor = env->GetMethodID(javaIntegerClazz, "<init>", "(I)V");
+
+  javaBooleanClazz = newJavaClassGlobalRef(env->FindClass("java/lang/Boolean"), env);
+  javaBooleanConstructor = env->GetMethodID(javaBooleanClazz, "<init>", "(Z)V");
+
+  javaDoubleClazz = newJavaClassGlobalRef(env->FindClass("java/lang/Double"), env);
+  javaDoubleConstructor = env->GetMethodID(javaDoubleClazz, "<init>", "(D)V");
+
+  auto mpvNoneClazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvNone");
+  auto mpvNoneInstanceField = env->GetStaticFieldID(mpvNoneClazz, "INSTANCE", "Lfr/nextv/libmpv/LibMpv$Value$MpvNone;");
+  MPV_NONE_SINGLETON = env->NewGlobalRef(env->GetStaticObjectField(mpvNoneClazz, mpvNoneInstanceField));
+
   return JNI_VERSION_1_6;
 }
 
-JNIEXPORT void JNICALL JNI_OnUnload(JavaVM* vm, void* reserved) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "JNI_OnUnload invoked");
+jobject createNoneValue() {
+  return MPV_NONE_SINGLETON;
+}
+
+jobject createValue(JNIEnv *env, mpv_format format, void *data) {
+  switch (format) {
+    case MPV_FORMAT_NONE: {
+      return createNoneValue();
+    }
+    case MPV_FORMAT_STRING: {
+      auto cString = *(const char**) data;
+      auto javaString = env->NewStringUTF(cString);
+      return env->NewObject(mpvStringClazz, mpvStringConstructor, javaString);
+    }
+    case MPV_FORMAT_FLAG: {
+      auto boolValue = *(int*) data;
+      return env->NewObject(mpvBoolClazz, mpvBoolConstructor, boolValue);
+    }
+    case MPV_FORMAT_INT64: {
+      auto intValue = *(int64_t*) data;
+      return env->NewObject(mpvIntClazz, mpvIntConstructor, intValue);
+    }
+    case MPV_FORMAT_DOUBLE: {
+      auto doubleValue = *(float*) data;
+      return env->NewObject(mpvDoubleClazz, mpvDoubleConstructor, doubleValue);
+    }
+    case MPV_FORMAT_NODE:
+    case MPV_FORMAT_NODE_ARRAY:
+    case MPV_FORMAT_NODE_MAP:
+    case MPV_FORMAT_BYTE_ARRAY:
+    case MPV_FORMAT_OSD_STRING: {
+      auto message = "FORMAT " + std::to_string(format) + " is not supported";
+      auto exception = env->FindClass("java/lang/NullPointerException");
+      env->ThrowNew(exception, message.c_str());
+      return NULL;
+    }
+  }
 }
 
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_fr_nextv_libmpv_LibMpv_createMpvHandle(JNIEnv *env, jobject thiz) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "createMpvHandle invoked");
   auto newMpvHandle = mpv_create();
   return reinterpret_cast<jlong>(newMpvHandle);
 }
@@ -45,9 +152,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_sendCommandString(
 ) {
   auto handle = getHandle(env, thiz);
   auto cString = env->GetStringUTFChars(javaString, nullptr);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "sendCommandString : %s", cString);
   auto commandResult = mpv_command_string(handle, cString);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "Command sent.. result = %d", commandResult);
   env->ReleaseStringUTFChars(javaString, cString);
   return commandResult;
 }
@@ -85,9 +190,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_setPropertyString(
   auto handle = getHandle(env, thiz);
   const char* cKey = env->GetStringUTFChars(key, nullptr);
   auto cValue = env->GetStringUTFChars(value, nullptr);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyString invoked... (%s %s)", cKey, cValue);
   auto result = mpv_set_property_string(handle, cKey, cValue);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyString result = %d", result);
   env->ReleaseStringUTFChars(key, cKey);
   env->ReleaseStringUTFChars(value, cValue);
   return result;
@@ -104,9 +207,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_setOptionString(
   auto handle = getHandle(env, thiz);
   const char* keyStr = env->GetStringUTFChars(key, nullptr);
   const char* valueStr = env->GetStringUTFChars(value, nullptr);
-   __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetOptionString invoked... (%s %s)", keyStr, valueStr);
   auto result = mpv_set_option_string(handle, keyStr, valueStr);
-   __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetOptionString result = %d", result);
   env->ReleaseStringUTFChars(key, keyStr);
   env->ReleaseStringUTFChars(value, valueStr);
   return result;
@@ -123,9 +224,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_setPropertyInt(
   auto handle = getHandle(env, thiz);
   const char* keyStr = env->GetStringUTFChars(key, nullptr);
   auto cIntValue = static_cast<int64_t>(value);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyInt invoked... (%s %ld)", keyStr, (long) cIntValue);
   auto result = mpv_set_property(handle, keyStr, MPV_FORMAT_INT64, &cIntValue);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyInt result = %d", result);
   env->ReleaseStringUTFChars(key, keyStr);
   return result;
 }
@@ -141,9 +240,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_setPropertyDouble(
   auto handle = getHandle(env, thiz);
   const char* keyStr = env->GetStringUTFChars(key, nullptr);
   double cDoubleValue = value;
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyDouble invoked... (%s %f)", keyStr, cDoubleValue);
   auto result = mpv_set_property(handle, keyStr, MPV_FORMAT_DOUBLE, &cDoubleValue);
-   __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyDouble result = %d", result);
   env->ReleaseStringUTFChars(key, keyStr);
   return result;
 }
@@ -159,9 +256,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_setPropertyBoolean(
   auto handle = getHandle(env, thiz);
   const char* keyStr = env->GetStringUTFChars(key, nullptr);
   double cBoolValue = (value == JNI_TRUE);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyBoolean invoked... (%s %f)", keyStr, cBoolValue);
   auto result = mpv_set_property(handle, keyStr, MPV_FORMAT_FLAG, &cBoolValue);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "nativeSetPropertyBoolean result = %d", result);
   env->ReleaseStringUTFChars(key, keyStr);
   return result;
 }
@@ -174,7 +269,6 @@ Java_fr_nextv_libmpv_MpvPlayerJni_observeProperty(
     jstring key,
     jint format
 ) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "observeProperty invoked");
   auto handle = getHandle(env, thiz);
   auto keyString = env->GetStringUTFChars(key, nullptr);
   auto result = mpv_observe_property(handle, 0, keyString, (mpv_format) format);
@@ -189,7 +283,6 @@ Java_fr_nextv_libmpv_MpvPlayerJni_unObserveProperties(
     JNIEnv *env,
     jobject thiz
 ) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "unobserveProperties invoked");
   auto handle = getHandle(env, thiz);
   auto result = mpv_unobserve_property(handle, 0);
   if (result < 0) {
@@ -201,12 +294,10 @@ Java_fr_nextv_libmpv_MpvPlayerJni_unObserveProperties(
 extern "C"
 JNIEXPORT jint JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_attachSurface(JNIEnv *env, jobject thiz, jobject java_surface) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "attachSurface invoked");
   auto cSurface = env->NewGlobalRef(java_surface);
   auto wid = (int64_t)(intptr_t) cSurface;
   auto handle = getHandle(env,thiz);
   auto result = mpv_set_option(handle, "wid", MPV_FORMAT_INT64, (void*) &wid);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "attachSurface result = %d", result);
   auto surfaceAddress = reinterpret_cast<jlong>(cSurface);
   auto javaClazz = env->GetObjectClass(thiz);
   auto javaField = env->GetFieldID(javaClazz, "currentSurface", "J");
@@ -217,11 +308,9 @@ Java_fr_nextv_libmpv_MpvPlayerJni_attachSurface(JNIEnv *env, jobject thiz, jobje
 extern "C"
 JNIEXPORT jint JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_detachSurface(JNIEnv *env, jobject thiz) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "detachSurface invoked");
   int64_t wid = 0;
   auto handle = getHandle(env, thiz);
   auto result = mpv_set_option(handle, "wid", MPV_FORMAT_INT64, (void*) &wid);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "detachSurface result = %d", result);
   auto javaClazz = env->GetObjectClass(thiz);
   auto javaField = env->GetFieldID(javaClazz, "currentSurface", "J");
   auto javaAddress = env->GetLongField(thiz, javaField);
@@ -236,7 +325,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_detachSurface(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_destroy(JNIEnv *env, jobject thiz) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "destroy invoked");
+  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "Destroying mpv handle...");
   auto handle = getHandle(env, thiz);
   mpv_wakeup(handle);
   mpv_destroy(handle);
@@ -245,10 +334,8 @@ Java_fr_nextv_libmpv_MpvPlayerJni_destroy(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT jint JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_initialize(JNIEnv *env, jobject thiz) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "initialize invoked");
   auto handle = getHandle(env, thiz);
   auto result = mpv_initialize(handle);
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "initialize result = %d", result);
   if (result != 0) {
     mpv_free(handle);
   }
@@ -282,9 +369,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_getPropertyDouble(JNIEnv *env, jobject thiz, j
   if (result >= 0) {
     return NULL;
   } else {
-    auto clazz = env->FindClass("java/lang/Double");
-    auto constructor = env->GetMethodID(clazz, "<init>", "(D)V");
-    return env->NewObject(clazz, constructor, (jdouble) output);
+    return env->NewObject(javaDoubleClazz, javaDoubleConstructor, (jdouble) output);
   }
 }
 
@@ -299,9 +384,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_getPropertyBoolean(JNIEnv *env, jobject thiz, 
   if (result >= 0) {
     return NULL;
   } else {
-    auto clazz = env->FindClass("java/lang/Boolean");
-    auto constructor = env->GetMethodID(clazz, "<init>", "(Z)V");
-    return env->NewObject(clazz, constructor, (jboolean) output);
+    return env->NewObject(javaBooleanClazz, javaBooleanConstructor, (jboolean) output);
   }
 }
 
@@ -316,65 +399,13 @@ Java_fr_nextv_libmpv_MpvPlayerJni_getPropertyInt(JNIEnv *env, jobject thiz, jstr
   if (result >= 0) {
     return NULL;
   } else {
-    auto clazz = env->FindClass("java/lang/Integer");
-    auto constructor = env->GetMethodID(clazz, "<init>", "(I)V");
-    return env->NewObject(clazz, constructor, (jint) output);
-  }
-}
-
-jobject createNoneValue(JNIEnv *env) {
-  auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvNone");
-  auto field = env->GetStaticFieldID(clazz, "INSTANCE", "Lfr/nextv/libmpv/LibMpv$Value$MpvNone;");
-  return env->GetStaticObjectField(clazz, field);
-}
-
-jobject createValue(JNIEnv *env, mpv_format format, void *data) {
-  switch (format) {
-    case MPV_FORMAT_NONE: {
-      return createNoneValue(env);
-    }
-    case MPV_FORMAT_STRING: {
-      auto cString = *(const char**) data;
-      auto javaString = env->NewStringUTF(cString);
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvString");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(Ljava/lang/String;)V");
-      return env->NewObject(clazz, constructor, javaString);
-    }
-    case MPV_FORMAT_FLAG: {
-      auto boolValue = *(int*) data;
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvBoolean");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(Z)V");
-      return env->NewObject(clazz, constructor, boolValue);
-    }
-    case MPV_FORMAT_INT64: {
-      auto intValue = *(int64_t*) data;
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvLong");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(J)V");
-      return env->NewObject(clazz, constructor, intValue);
-    }
-    case MPV_FORMAT_DOUBLE: {
-      auto doubleValue = *(float*) data;
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Value$MpvDouble");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(F)V");
-      return env->NewObject(clazz, constructor, doubleValue);
-    }
-    case MPV_FORMAT_NODE:
-    case MPV_FORMAT_NODE_ARRAY:
-    case MPV_FORMAT_NODE_MAP:
-    case MPV_FORMAT_BYTE_ARRAY:
-    case MPV_FORMAT_OSD_STRING: {
-      auto message = "FORMAT " + std::to_string(format) + " is not supported";
-      auto exception = env->FindClass("java/lang/NullPointerException");
-      env->ThrowNew(exception, message.c_str());
-      return NULL;
-    }
+    return env->NewObject(javaIntegerClazz, javaIntegerConstructor, (jint) output);
   }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_cancelCurrentAwaitNextEvent(JNIEnv *env, jobject thiz) {
-  __android_log_print(ANDROID_LOG_DEBUG, PLAYER_TAG, "cancelCurrentAwaitNextEvent");
   auto handle = getHandle(env, thiz);
   mpv_wakeup(handle);
 }
@@ -384,35 +415,22 @@ JNIEXPORT jobject JNICALL
 Java_fr_nextv_libmpv_MpvPlayerJni_awaitNextEvent(JNIEnv *env, jobject thiz) {
   auto handle = getHandle(env, thiz);
   auto nextEvent = mpv_wait_event(handle, 0);
-  if (nextEvent->event_id != MPV_EVENT_NONE) {
-    __android_log_print(
-      ANDROID_LOG_VERBOSE,
-      PLAYER_TAG,
-      "Received an mpv_event [id=%d, name=%s, error$%d]", nextEvent->event_id,  mpv_event_name(nextEvent->event_id), nextEvent->error
-    );
-  }
-
   auto eventType = nextEvent->event_id;
 
   switch (eventType) {
     case MPV_EVENT_PROPERTY_CHANGE: {
       auto property = (mpv_event_property*) nextEvent->data;
       auto propertyName = env->NewStringUTF(property->name);
-      __android_log_print(ANDROID_LOG_VERBOSE, PLAYER_TAG, "Property changed: [name=%s, format=%d]", property->name, property->format);
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Event$PropertyChange");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(Ljava/lang/String;Lfr/nextv/libmpv/LibMpv$Value;)V");
       auto value = createValue(env, property->format, property->data);
-      return env->NewObject(clazz, constructor, propertyName, value);
+      return env->NewObject(mpvPropertyChangeClazz, mpvPropertyChangeConstructor, propertyName, value);
     }
     case MPV_EVENT_LOG_MESSAGE: {
       auto data = (mpv_event_log_message*) nextEvent->data;
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Event$LogMessage");
-      auto constructor = env->GetMethodID(clazz, "<init>", "(ILjava/lang/String;Ljava/lang/String;)V");
       auto prefix = env->NewStringUTF(data->prefix);
       auto text = env->NewStringUTF(data->text);
       auto result =  env->NewObject(
-          clazz,
-          constructor,
+          mpvLogMessageClazz,
+          mpvLogMessageConstructor,
           (jint) data->log_level, prefix, text
       );
       return result;
@@ -452,9 +470,7 @@ Java_fr_nextv_libmpv_MpvPlayerJni_awaitNextEvent(JNIEnv *env, jobject thiz) {
     case MPV_EVENT_PLAYBACK_RESTART:
     case MPV_EVENT_QUEUE_OVERFLOW:
     case MPV_EVENT_HOOK: {
-      auto clazz = env->FindClass("fr/nextv/libmpv/LibMpv$Event$SimpleEvent");
-      auto creator = env->GetStaticMethodID(clazz, "fromNativeCode", "(I)Lfr/nextv/libmpv/LibMpv$Event$SimpleEvent;");
-      return env->CallStaticObjectMethod(clazz, creator, (jint ) nextEvent->event_id);
+      return env->CallStaticObjectMethod(mpvSimpleEventClazz, mpvSimpleEventCreator, (jint ) nextEvent->event_id);
     }
 
   }
